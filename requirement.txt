@@ -1,0 +1,12 @@
+# Core project dependencies
+pandas==2.0.3           # For CSV handling and history management
+
+# Testing and linting dependencies
+pytest==8.3.3           # For unit testing
+pylint==2.17.5          # For code quality checks
+
+# Optional: Additional dependencies based on usage
+numpy==1.25.0           # Optional: If you need numerical operations support
+
+#pip install -r requirements.txt
+#pip freeze > requirements.txt
