@@ -1,29 +1,33 @@
 # tests/test_operations.py
-import unittest
+import pytest
 from app.operations import Operations
 
-class TestOperations(unittest.TestCase):
-    def setUp(self):
-        self.operations = Operations()
+@pytest.fixture
+def operations():
+    return Operations()
 
-    def test_addition(self):
-        self.assertEqual(self.operations.add(5, 3), 8)
+def test_add(operations):
+    assert operations.add(5, 3) == 8
 
-    def test_subtraction(self):
-        self.assertEqual(self.operations.subtract(5, 3), 2)
+def test_subtract(operations):
+    assert operations.subtract(5, 3) == 2
 
-    def test_multiplication(self):
-        self.assertEqual(self.operations.multiply(5, 3), 15)
+def test_multiply(operations):
+    assert operations.multiply(5, 3) == 15
 
-    def test_division(self):
-        self.assertEqual(self.operations.divide(6, 3), 2)
-        with self.assertRaises(ZeroDivisionError):
-            self.operations.divide(6, 0)
+def test_divide(operations):
+    assert operations.divide(6, 3) == 2
 
-    def test_power(self):
-        self.assertEqual(self.operations.power(2, 3), 8)
+def test_divide_by_zero(operations):
+    with pytest.raises(ZeroDivisionError):
+        operations.divide(5, 0)
 
-    def test_root(self):
-        self.assertEqual(self.operations.root(9, 2), 3)
-        with self.assertRaises(ValueError):
-            self.operations.root(-9, 2)
+def test_power(operations):
+    assert operations.power(2, 3) == 8
+
+def test_root(operations):
+    assert operations.root(9, 2) == 3
+
+def test_root_negative_number(operations):
+    with pytest.raises(ValueError):  # Assuming root of negative is invalid
+        operations.root(-9, 2)

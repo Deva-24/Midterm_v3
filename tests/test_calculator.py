@@ -1,32 +1,77 @@
 # tests/test_calculator.py
-import unittest
-import os
-from app.calculator import Calculator, CalculatorConfig
+import pytest
+import pandas as pd
+from app.calculator import Calculator
+import tempfile
 
-class TestCalculator(unittest.TestCase):
-    def setUp(self):
-        self.calculator = Calculator()
-        # Clear any existing history file
-        if os.path.exists(os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv")):
-            os.remove(os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv"))
 
-    def test_execute_add(self):
-        result = self.calculator.execute("add", 5, 3)
-        self.assertEqual(result, 8)
+@pytest.fixture
+def calculator():
+    return Calculator()
 
-    def test_save_and_load_history(self):
-        self.calculator.execute("add", 1, 2)
-        self.calculator.execute("multiply", 3, 4)
-        self.calculator.save_history()
-        # Reload history and check if it's preserved
-        new_calculator = Calculator()
-        new_calculator.load_history()
-        self.assertEqual(len(new_calculator.history), 2)
+def test_add(calculator):
+    result = calculator.execute("add", 5, 3)
+    assert result == 8
 
-    def tearDown(self):
-        # Clean up saved files after each test
-        if os.path.exists(os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv")):
-            os.remove(os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv"))
+def test_subtract(calculator):
+    result = calculator.execute("subtract", 5, 3)
+    assert result == 2
 
-if __name__ == "__main__":
-    unittest.main()
+def test_multiply(calculator):
+    result = calculator.execute("multiply", 5, 3)
+    assert result == 15
+
+def test_divide(calculator):
+    result = calculator.execute("divide", 6, 3)
+    assert result == 2
+
+def test_divide_by_zero(calculator):
+    with pytest.raises(ZeroDivisionError):
+        calculator.execute("divide", 5, 0)
+
+def test_power(calculator):
+    result = calculator.execute("power", 2, 3)
+    assert result == 8
+
+def test_root(calculator):
+    result = calculator.execute("root", 9, 2)
+    assert result == 3
+
+def test_undo(calculator):
+    calculator.execute("add", 5, 3)
+    calculator.execute("subtract", 8, 2)
+    calculator.undo()
+    assert calculator.history[calculator.current_index]["operation"] == "add"
+
+def test_redo(calculator):
+    calculator.execute("add", 5, 3)
+    calculator.execute("subtract", 8, 2)
+    calculator.undo()
+    calculator.redo()
+    assert calculator.history[calculator.current_index]["operation"] == "subtract"
+
+
+def test_save_and_load_history():
+    # Create a Calculator instance
+    calc = Calculator()
+
+    # Perform some operations
+    calc.add(5, 3)
+    calc.subtract(10, 4)
+
+    # Use a temporary directory to save the history file
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_file = f"{temp_dir}/history.csv"
+        calc.save_history(temp_file)
+        
+        # Check if the file was created and saved
+        assert os.path.exists(temp_file), "History file was not created."
+
+        # Load the history from the file and check contents
+        calc.load_history(temp_file)
+        history_df = pd.read_csv(temp_file)
+        assert len(history_df) == 2, "History data does not match expected entries."
+
+
+
+
