@@ -3,6 +3,7 @@ import pytest
 import pandas as pd
 from app.calculator import Calculator
 import tempfile
+import os  # Make sure os is imported
 
 
 @pytest.fixture
@@ -55,14 +56,14 @@ def test_save_and_load_history():
     # Create a Calculator instance
     calc = Calculator()
 
-    # Perform some operations
-    calc.add(5, 3)
-    calc.subtract(10, 4)
+    # Perform some operations using execute, not add directly
+    calc.execute("add", 5, 3)
+    calc.execute("subtract", 10, 4)
 
     # Use a temporary directory to save the history file
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_file = f"{temp_dir}/history.csv"
-        calc.save_history(temp_file)
+        calc.save_history(temp_file)  # Pass temp_file path
         
         # Check if the file was created and saved
         assert os.path.exists(temp_file), "History file was not created."
@@ -71,7 +72,3 @@ def test_save_and_load_history():
         calc.load_history(temp_file)
         history_df = pd.read_csv(temp_file)
         assert len(history_df) == 2, "History data does not match expected entries."
-
-
-
-

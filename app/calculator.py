@@ -61,12 +61,20 @@ class Calculator:
         print(f"Redone: {entry['operation']}({entry['operands'][0]}, {entry['operands'][1]}) = {entry['result']}")
         return entry
 
-    def save_history(self):
+    def save_history(self, file_path=None):
+        # Use the provided file_path, or default to the configured directory
+        if file_path is None:
+            file_path = os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv")
         df = pd.DataFrame(self.history)
-        df.to_csv(os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv"), index=False)
+        df.to_csv(file_path, index=False)
 
-    def load_history(self):
-        path = os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv")
-        if os.path.exists(path):
-            self.history = pd.read_csv(path).to_dict(orient='records')
+    def load_history(self, file_path=None):
+        if file_path is None:
+            file_path = os.path.join(CalculatorConfig.CALCULATOR_BASE_DIR, "history.csv")
+        if os.path.exists(file_path):
+            self.history = pd.read_csv(file_path).to_dict(orient='records')
             self.current_index = len(self.history) - 1
+        else:
+            print("History file does not exist.")
+
+    
